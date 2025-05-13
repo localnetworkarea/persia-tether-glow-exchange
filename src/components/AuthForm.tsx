@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { createUser, loginUser } from "@/lib/database";
+import { loginUser, registerUser } from "@/lib/supabase";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -68,12 +67,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
     setLoading(true);
     
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use the database service
-      loginUser(values.email, values.password);
-      
+      await loginUser(values.email, values.password);
       toast.success('با موفقیت وارد شدید!');
       navigate('/');
     } catch (error) {
@@ -87,12 +81,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
     setLoading(true);
     
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use the database service
-      const newUser = createUser(values.email, values.password, values.name);
-      
+      await registerUser(values.email, values.password, values.name);
       toast.success('ثبت نام شما با موفقیت انجام شد!');
       navigate('/');
     } catch (error) {

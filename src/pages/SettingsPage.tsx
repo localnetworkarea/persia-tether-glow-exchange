@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,34 +8,134 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { getCurrentUser, getUserProfile, getKycData, submitKycData, supabase } from "@/lib/supabase";
 
 const SettingsPage = () => {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
   const [kycStatus, setKycStatus] = useState<'unverified' | 'pending' | 'verified'>('unverified');
   const [idImage, setIdImage] = useState<File | null>(null);
+  const [idImageUrl, setIdImageUrl] = useState<string | null>(null);
   const [selfieImage, setSelfieImage] = useState<File | null>(null);
+  const [selfieImageUrl, setSelfieImageUrl] = useState<string | null>(null);
   const [fullName, setFullName] = useState('');
   const [nationalId, setNationalId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
   
-  const handleKycSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          toast.error('برای دسترسی به این صفحه، لطفاً وارد شوید');
+          navigate('/auth');
+          return;
+        }
+        
+        setUserId(user.id);
+        
+        // Get user profile data
+        const profile = await getUserProfile(user.id);
+        setKycStatus(profile.kyc_status as 'unverified' | 'pending' | 'verified');
+        
+        // Get KYC data if it exists
+        const kycData = await getKycData(user.id);
+        if (kycData) {
+          setFullName(kycData.full_name || '');
+          setNationalId(kycData.national_id || '');
+          setPhoneNumber(kycData.phone_number || '');
+          setAddress(kycData.address || '');
+          setIdImageUrl(kycData.id_image_url);
+          setSelfieImageUrl(kycData.selfie_image_url);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error('خطا در دریافت اطلاعات کاربر');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+
+  const uploadImage = async (file: File, path: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('kyc-images')
+      .upload(filePath, file);
+    
+    if (uploadError) {
+      throw uploadError;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('kyc-images')
+      .getPublicUrl(filePath);
+      
+    return urlData.publicUrl;
+  };
+  
+  const handleKycSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
-    if (!fullName || !nationalId || !phoneNumber || !address || !idImage || !selfieImage) {
-      toast.error('لطفاً تمامی فیلدها را تکمیل کنید');
+    if (!userId) {
+      toast.error('لطفا مجددا وارد شوید');
       return;
     }
     
-    // Simulate API call
-    toast.info('درخواست احراز هویت شما در حال بررسی است');
-    setTimeout(() => {
-      setKycStatus('pending');
+    // Validation
+    if (!fullName || !nationalId || !phoneNumber || !address) {
+      toast.error('لطفاً تمامی فیلدهای متنی را تکمیل کنید');
+      return;
+    }
+    
+    // Check if we need both images on first submit
+    const isFirstSubmit = kycStatus === 'unverified';
+    if (isFirstSubmit && (!idImage || !selfieImage)) {
+      toast.error('لطفاً هر دو تصویر مورد نیاز را بارگذاری کنید');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Upload new images if provided
+      let newIdImageUrl = idImageUrl;
+      let newSelfieImageUrl = selfieImageUrl;
+      
+      if (idImage) {
+        newIdImageUrl = await uploadImage(idImage, 'id-images');
+      }
+      
+      if (selfieImage) {
+        newSelfieImageUrl = await uploadImage(selfieImage, 'selfie-images');
+      }
+      
+      // Submit KYC data
+      await submitKycData({
+        user_id: userId,
+        full_name: fullName,
+        national_id: nationalId,
+        phone_number: phoneNumber,
+        address: address,
+        id_image_url: newIdImageUrl,
+        selfie_image_url: newSelfieImageUrl,
+      });
+      
       toast.success('درخواست احراز هویت شما با موفقیت ثبت شد');
-    }, 1500);
+      setKycStatus('pending');
+    } catch (error) {
+      console.error('Error submitting KYC data:', error);
+      toast.error('خطا در ارسال اطلاعات احراز هویت');
+    } finally {
+      setLoading(false);
+    }
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFile: React.Dispatch<React.SetStateAction<File | null>>) => {
@@ -141,8 +241,10 @@ const SettingsPage = () => {
                     لطفاً تصویر واضحی از کارت ملی خود بارگذاری کنید
                   </p>
                 </div>
-                {idImage && (
-                  <p className="text-sm text-green-600">{idImage.name} بارگذاری شد</p>
+                {(idImage || idImageUrl) && (
+                  <p className="text-sm text-green-600">
+                    {idImage ? `${idImage.name} بارگذاری شد` : 'تصویر قبلی موجود است'}
+                  </p>
                 )}
               </div>
               
@@ -160,8 +262,10 @@ const SettingsPage = () => {
                     لطفاً تصویر سلفی خود در حالی که کارت ملی کنار صورت شماست بارگذاری کنید
                   </p>
                 </div>
-                {selfieImage && (
-                  <p className="text-sm text-green-600">{selfieImage.name} بارگذاری شد</p>
+                {(selfieImage || selfieImageUrl) && (
+                  <p className="text-sm text-green-600">
+                    {selfieImage ? `${selfieImage.name} بارگذاری شد` : 'تصویر قبلی موجود است'}
+                  </p>
                 )}
               </div>
             </div>
@@ -169,8 +273,9 @@ const SettingsPage = () => {
             <Button 
               type="submit" 
               className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20 mt-8"
+              disabled={loading}
             >
-              ارسال مدارک و درخواست احراز هویت
+              {loading ? 'در حال ارسال...' : 'ارسال مدارک و درخواست احراز هویت'}
             </Button>
             
             <p className="text-sm text-muted-foreground text-center mt-4">
