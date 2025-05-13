@@ -1,20 +1,39 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getCurrentUser } from "@/lib/database";
 
 const WalletPage = () => {
-  // Dummy wallet data - in a real app this would come from an API
-  const walletData = {
+  const navigate = useNavigate();
+  const [walletData, setWalletData] = useState({
     tetherBalance: 0,
     rialBalance: 0,
     depositAddress: 'TK9ihHoEUCUwNFXNfxj6Yc5DrtaBGh5wLL',
     transactions: []
-  };
+  });
+
+  useEffect(() => {
+    // Check if user is logged in
+    const user = getCurrentUser();
+    if (!user) {
+      toast.error('برای مشاهده کیف پول، لطفاً وارد شوید');
+      navigate('/auth');
+      return;
+    }
+
+    // Update wallet data with user info
+    setWalletData(prevState => ({
+      ...prevState,
+      tetherBalance: user.tetherBalance,
+      rialBalance: user.rialBalance
+    }));
+  }, [navigate]);
   
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(walletData.depositAddress);

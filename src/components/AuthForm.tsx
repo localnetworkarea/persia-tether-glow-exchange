@@ -5,38 +5,95 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { createUser, loginUser } from "@/lib/database";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface AuthFormProps {
   type: 'login' | 'register';
   onToggleType: () => void;
 }
 
+// Define the form schema
+const loginSchema = z.object({
+  email: z.string().email("لطفا یک ایمیل معتبر وارد کنید"),
+  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+});
+
+const registerSchema = z.object({
+  name: z.string().min(2, "نام باید حداقل 2 کاراکتر باشد"),
+  email: z.string().email("لطفا یک ایمیل معتبر وارد کنید"),
+  password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
+  confirmPassword: z.string().min(6, "تأیید رمز عبور باید حداقل 6 کاراکتر باشد"),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "رمز عبور و تأیید آن مطابقت ندارند",
+  path: ["confirmPassword"],
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
 const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+  
+  const handleLoginSubmit = async (values: LoginFormValues) => {
     setLoading(true);
     
     try {
-      if (type === 'register' && password !== confirmPassword) {
-        throw new Error('رمز عبور و تأیید آن مطابقت ندارند');
-      }
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Usually we'd call an API here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Use the database service
+      loginUser(values.email, values.password);
       
-      if (type === 'login') {
-        toast.success('با موفقیت وارد شدید!');
-      } else {
-        toast.success('ثبت نام شما با موفقیت انجام شد!');
-      }
+      toast.success('با موفقیت وارد شدید!');
+      navigate('/');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'خطایی رخ داد');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleRegisterSubmit = async (values: RegisterFormValues) => {
+    setLoading(true);
+    
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Use the database service
+      const newUser = createUser(values.email, values.password, values.name);
+      
+      toast.success('ثبت نام شما با موفقیت انجام شد!');
       navigate('/');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'خطایی رخ داد');
@@ -51,77 +108,157 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
         {type === 'login' ? 'ورود به حساب کاربری' : 'ایجاد حساب جدید'}
       </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {type === 'register' && (
-          <div>
-            <label htmlFor="name" className="block mb-2 text-sm">نام کامل</label>
-            <Input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full"
-              placeholder="نام و نام خانوادگی خود را وارد کنید"
-              dir="rtl"
+      {type === 'login' ? (
+        <Form {...loginForm}>
+          <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
+            <FormField
+              control={loginForm.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block mb-2 text-sm">ایمیل</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      required
+                      className="w-full"
+                      placeholder="ایمیل خود را وارد کنید"
+                      dir="rtl"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-right" />
+                </FormItem>
+              )}
             />
-          </div>
-        )}
-        
-        <div>
-          <label htmlFor="email" className="block mb-2 text-sm">ایمیل</label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full"
-            placeholder="ایمیل خود را وارد کنید"
-            dir="rtl"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="password" className="block mb-2 text-sm">رمز عبور</label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full"
-            placeholder="رمز عبور خود را وارد کنید"
-            dir="rtl"
-          />
-        </div>
-        
-        {type === 'register' && (
-          <div>
-            <label htmlFor="confirmPassword" className="block mb-2 text-sm">تأیید رمز عبور</label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full"
-              placeholder="رمز عبور را مجددا وارد کنید"
-              dir="rtl"
+            
+            <FormField
+              control={loginForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block mb-2 text-sm">رمز عبور</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      required
+                      className="w-full"
+                      placeholder="رمز عبور خود را وارد کنید"
+                      dir="rtl"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-right" />
+                </FormItem>
+              )}
             />
-          </div>
-        )}
-        
-        <Button
-          type="submit"
-          className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20"
-          disabled={loading}
-        >
-          {loading ? 
-            (type === 'login' ? 'در حال ورود...' : 'در حال ثبت نام...') : 
-            (type === 'login' ? 'ورود به حساب' : 'ثبت نام')}
-        </Button>
-      </form>
+            
+            <Button
+              type="submit"
+              className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20"
+              disabled={loading}
+            >
+              {loading ? 'در حال ورود...' : 'ورود به حساب'}
+            </Button>
+          </form>
+        </Form>
+      ) : (
+        <Form {...registerForm}>
+          <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
+            <FormField
+              control={registerForm.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block mb-2 text-sm">نام کامل</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      required
+                      className="w-full"
+                      placeholder="نام و نام خانوادگی خود را وارد کنید"
+                      dir="rtl"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-right" />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={registerForm.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block mb-2 text-sm">ایمیل</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      required
+                      className="w-full"
+                      placeholder="ایمیل خود را وارد کنید"
+                      dir="rtl"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-right" />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={registerForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block mb-2 text-sm">رمز عبور</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      required
+                      className="w-full"
+                      placeholder="رمز عبور خود را وارد کنید"
+                      dir="rtl"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-right" />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={registerForm.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block mb-2 text-sm">تأیید رمز عبور</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      required
+                      className="w-full"
+                      placeholder="رمز عبور را مجددا وارد کنید"
+                      dir="rtl"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-right" />
+                </FormItem>
+              )}
+            />
+            
+            <Button
+              type="submit"
+              className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20"
+              disabled={loading}
+            >
+              {loading ? 'در حال ثبت نام...' : 'ثبت نام'}
+            </Button>
+          </form>
+        </Form>
+      )}
       
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
