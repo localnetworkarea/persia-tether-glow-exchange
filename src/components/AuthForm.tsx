@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { loginUser, registerUser } from "@/lib/supabase";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +30,7 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
-  name: z.string().min(2, "نام باید حداقل 2 کاراکتر باشد"),
+  fullName: z.string().min(2, "نام کامل باید حداقل 2 کاراکتر باشد"),
   email: z.string().email("لطفا یک ایمیل معتبر وارد کنید"),
   password: z.string().min(6, "رمز عبور باید حداقل 6 کاراکتر باشد"),
   confirmPassword: z.string().min(6, "تأیید رمز عبور باید حداقل 6 کاراکتر باشد"),
@@ -56,7 +57,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
+      fullName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -68,10 +69,16 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
     
     try {
       await loginUser(values.email, values.password);
-      toast.success('با موفقیت وارد شدید!');
+      toast({
+        title: "با موفقیت وارد شدید!",
+        variant: "default"
+      });
       navigate('/');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'خطایی رخ داد');
+      toast({
+        title: error instanceof Error ? error.message : 'خطایی رخ داد',
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -81,11 +88,17 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
     setLoading(true);
     
     try {
-      await registerUser(values.email, values.password, values.name);
-      toast.success('ثبت نام شما با موفقیت انجام شد!');
+      await registerUser(values.email, values.password, values.fullName);
+      toast({
+        title: "ثبت نام شما با موفقیت انجام شد!",
+        variant: "default"
+      });
       navigate('/');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'خطایی رخ داد');
+      toast({
+        title: error instanceof Error ? error.message : 'خطایی رخ داد',
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -156,7 +169,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type, onToggleType }) => {
           <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
             <FormField
               control={registerForm.control}
-              name="name"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="block mb-2 text-sm">نام کامل</FormLabel>

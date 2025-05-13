@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase client configuration
@@ -70,12 +69,12 @@ export const loginUser = async (email: string, password: string) => {
   return data.user;
 };
 
-export const registerUser = async (email: string, password: string, name: string | null = null) => {
+export const registerUser = async (email: string, password: string, fullName: string | null = null) => {
   const { data, error } = await supabase.auth.signUp({
     email, 
     password,
     options: {
-      data: { name }
+      data: { fullName }
     }
   });
   
@@ -89,7 +88,7 @@ export const registerUser = async (email: string, password: string, name: string
         id: data.user.id,
         email: email,
         password: 'hashed', // Note: Auth handles real password, this is just a placeholder
-        name: name,
+        name: fullName,
         is_verified: false,
         kyc_status: 'unverified',
         tether_balance: 0,
