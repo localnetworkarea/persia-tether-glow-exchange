@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { registerUser } from "@/lib/supabase";
 import { registerSchema, RegisterFormValues } from "@/lib/validation-schemas";
 import {
@@ -46,6 +46,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
       });
       navigate('/');
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: error instanceof Error ? error.message : 'خطایی رخ داد',
         variant: "destructive"
