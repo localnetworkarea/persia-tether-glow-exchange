@@ -11,13 +11,6 @@ type ToasterToast = ToastProps & {
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
 
-type ToasterToast = ToastProps & {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-}
-
 let count = 0
 
 function genId() {
@@ -66,4 +59,3 @@ function useToast() {
 }
 
 export { useToast, toast }
-
