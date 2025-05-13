@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { loginUser } from "@/lib/supabase";
 import { loginSchema, LoginFormValues } from "@/lib/validation-schemas";
+import { motion } from "framer-motion";
+import { LogIn } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -54,7 +56,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleType }) => {
   };
   
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
@@ -62,13 +68,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleType }) => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm">ایمیل</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium">ایمیل</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="email"
                     required
-                    className="w-full"
+                    className="w-full bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary"
                     placeholder="ایمیل خود را وارد کنید"
                     dir="rtl"
                   />
@@ -83,13 +89,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleType }) => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm">رمز عبور</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium">رمز عبور</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     required
-                    className="w-full"
+                    className="w-full bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary"
                     placeholder="رمز عبور خود را وارد کنید"
                     dir="rtl"
                   />
@@ -101,10 +107,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleType }) => {
           
           <Button
             type="submit"
-            className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20"
+            className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all"
             disabled={loading}
           >
-            {loading ? 'در حال ورود...' : 'ورود به حساب'}
+            {loading ? 'در حال ورود...' : (
+              <span className="flex items-center justify-center gap-2">
+                <LogIn className="h-4 w-4" />
+                ورود به حساب
+              </span>
+            )}
           </Button>
         </form>
       </Form>
@@ -115,13 +126,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleType }) => {
           <button
             type="button"
             onClick={onToggleType}
-            className="text-primary hover:underline focus:outline-none"
+            className="text-primary hover:underline focus:outline-none font-medium"
           >
             ثبت نام کنید
           </button>
         </p>
       </div>
-    </>
+    </motion.div>
   );
 };
 

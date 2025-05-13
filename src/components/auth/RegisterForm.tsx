@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { registerUser } from "@/lib/supabase";
 import { registerSchema, RegisterFormValues } from "@/lib/validation-schemas";
+import { motion } from "framer-motion";
+import { UserPlus } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -57,7 +59,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
   };
   
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
@@ -65,13 +71,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm">نام کامل</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium">نام کامل</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="text"
                     required
-                    className="w-full"
+                    className="w-full bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary"
                     placeholder="نام و نام خانوادگی خود را وارد کنید"
                     dir="rtl"
                   />
@@ -86,13 +92,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm">ایمیل</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium">ایمیل</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="email"
                     required
-                    className="w-full"
+                    className="w-full bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary"
                     placeholder="ایمیل خود را وارد کنید"
                     dir="rtl"
                   />
@@ -107,13 +113,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm">رمز عبور</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium">رمز عبور</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     required
-                    className="w-full"
+                    className="w-full bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary"
                     placeholder="رمز عبور خود را وارد کنید"
                     dir="rtl"
                   />
@@ -128,13 +134,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block mb-2 text-sm">تأیید رمز عبور</FormLabel>
+                <FormLabel className="block mb-2 text-sm font-medium">تأیید رمز عبور</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     required
-                    className="w-full"
+                    className="w-full bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary"
                     placeholder="رمز عبور را مجددا وارد کنید"
                     dir="rtl"
                   />
@@ -146,10 +152,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
           
           <Button
             type="submit"
-            className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20"
+            className="w-full animated-gradient-button text-white py-2 px-4 rounded-md shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all"
             disabled={loading}
           >
-            {loading ? 'در حال ثبت نام...' : 'ثبت نام'}
+            {loading ? 'در حال ثبت نام...' : (
+              <span className="flex items-center justify-center gap-2">
+                <UserPlus className="h-4 w-4" />
+                ثبت نام
+              </span>
+            )}
           </Button>
         </form>
       </Form>
@@ -160,13 +171,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleType }) => {
           <button
             type="button"
             onClick={onToggleType}
-            className="text-primary hover:underline focus:outline-none"
+            className="text-primary hover:underline focus:outline-none font-medium"
           >
             وارد شوید
           </button>
         </p>
       </div>
-    </>
+    </motion.div>
   );
 };
 
