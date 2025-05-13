@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import Feature3DCard from "@/components/Feature3DCard";
 import TetherExchangeCard from "@/components/TetherExchangeCard";
+import { Grid2X2, Columns2 } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -74,50 +75,66 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Live Exchange Card */}
-        <section className="py-16 px-6">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-crypto-indigo to-crypto-purple bg-clip-text text-transparent">
-              معاملات آنلاین تتر
-            </h2>
-            <div className="flex justify-center">
-              <TetherExchangeCard />
+        {/* 2D Sections Layout */}
+        <section className="py-12 px-6 md:px-16 bg-card/50 rounded-t-3xl">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-10">
+              <Grid2X2 className="w-6 h-6 text-crypto-purple" />
+              <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-crypto-indigo to-crypto-purple bg-clip-text text-transparent">
+                بخش‌های ویژه
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-8">
+                <div className="bg-card border border-border/50 p-8 rounded-2xl shadow-lg shadow-crypto-purple/5 card-3d">
+                  <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-crypto-purple to-crypto-blue bg-clip-text text-transparent">
+                    معاملات آنلاین تتر
+                  </h3>
+                  <TetherExchangeCard />
+                </div>
+              </div>
+              
+              {/* Right Column */}
+              <div className="bg-card border border-border/50 p-8 rounded-2xl shadow-lg shadow-crypto-purple/5 card-3d">
+                <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-crypto-indigo to-crypto-teal bg-clip-text text-transparent">
+                  همین حالا ثبت‌نام کنید
+                </h3>
+                <p className="text-lg text-muted-foreground mb-8">
+                  با ثبت نام در تتر اکسچنج، به سادگی معاملات ارز دیجیتال خود را آغاز کنید
+                </p>
+                <Button 
+                  className="animated-gradient-button text-white px-8 py-6 w-full rounded-xl text-lg shadow-lg shadow-purple-500/20"
+                  onClick={() => navigate('/auth')}
+                >
+                  ثبت‌نام رایگان
+                </Button>
+              </div>
             </div>
           </div>
         </section>
         
         {/* Features Section */}
-        <section className="py-20 px-6 md:px-16">
-          <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-crypto-indigo to-crypto-purple bg-clip-text text-transparent">
-            ویژگی‌های برتر
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {features.map((feature, index) => (
-              <Feature3DCard
-                key={index}
-                title={feature.title}
-                description={feature.description}
-                icon={feature.icon}
-              />
-            ))}
-          </div>
-        </section>
-        
-        {/* CTA Section */}
-        <section className="py-20 px-6 md:px-16 text-center">
-          <div className="max-w-3xl mx-auto bg-card rounded-3xl p-10 border border-primary/10 animated-shadow card-3d">
-            <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-crypto-purple to-crypto-blue bg-clip-text text-transparent">
-              همین حالا ثبت‌نام کنید
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              با ثبت نام در تتر اکسچنج، به سادگی معاملات ارز دیجیتال خود را آغاز کنید
-            </p>
-            <Button 
-              className="animated-gradient-button text-white px-8 py-6 rounded-full text-lg shadow-lg shadow-purple-500/20"
-              onClick={() => navigate('/auth')}
-            >
-              ثبت‌نام رایگان
-            </Button>
+        <section className="py-20 px-6 md:px-16 bg-background">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-10">
+              <Columns2 className="w-6 h-6 text-crypto-purple" />
+              <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-crypto-indigo to-crypto-purple bg-clip-text text-transparent">
+                ویژگی‌های برتر
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {features.map((feature, index) => (
+                <Feature3DCard
+                  key={index}
+                  title={feature.title}
+                  description={feature.description}
+                  icon={feature.icon}
+                />
+              ))}
+            </div>
           </div>
         </section>
       </main>
