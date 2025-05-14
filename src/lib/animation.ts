@@ -17,6 +17,37 @@ export const fadeInUpVariants: Variants = {
   }
 };
 
+// Side fade variants (left/right)
+export const fadeInLeftVariants: Variants = {
+  hidden: { 
+    x: -50, 
+    opacity: 0 
+  },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut"
+    }
+  }
+};
+
+export const fadeInRightVariants: Variants = {
+  hidden: { 
+    x: 50, 
+    opacity: 0 
+  },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut"
+    }
+  }
+};
+
 // Container variants for staggered children animations
 export const staggerContainerVariants: Variants = {
   hidden: {},
@@ -64,6 +95,64 @@ export const rotateVariants: Variants = {
       duration: 3,
       repeat: Infinity,
       ease: "linear"
+    }
+  }
+};
+
+// List item variants with index-based delay
+export const listItemVariants: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20 
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.15,
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  })
+};
+
+// Scale fade animation for popups and modals
+export const scaleFadeVariants: Variants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.95 
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    transition: {
+      duration: 0.2,
+      ease: "easeIn"
+    }
+  }
+};
+
+// Spring animation for elements that need bounce
+export const springUpVariants: Variants = {
+  hidden: { 
+    y: 50,
+    opacity: 0 
+  },
+  visible: { 
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 15
     }
   }
 };
