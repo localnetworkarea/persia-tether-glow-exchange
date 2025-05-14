@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
@@ -8,9 +8,90 @@ import { Button } from "@/components/ui/button";
 import Feature3DCard from "@/components/Feature3DCard";
 import TetherExchangeCard from "@/components/TetherExchangeCard";
 import { Grid2X2, Columns2 } from 'lucide-react';
+import { motion, useAnimation } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
 const Index = () => {
   const navigate = useNavigate();
+  
+  // Animation controls for various sections
+  const heroControls = useAnimation();
+  const featuresControls = useAnimation();
+  const sectionsControls = useAnimation();
+  
+  // Refs to track when elements are in view
+  const [heroRef, heroInView] = useInView({ threshold: 0.2, triggerOnce: true });
+  const [featuresRef, featuresInView] = useInView({ threshold: 0.2, triggerOnce: true });
+  const [sectionsRef, sectionsInView] = useInView({ threshold: 0.2, triggerOnce: true });
+  
+  // Trigger animations when elements come into view
+  useEffect(() => {
+    if (heroInView) {
+      heroControls.start("visible");
+    }
+    
+    if (featuresInView) {
+      featuresControls.start("visible");
+    }
+    
+    if (sectionsInView) {
+      sectionsControls.start("visible");
+    }
+  }, [
+    heroInView, heroControls,
+    featuresInView, featuresControls,
+    sectionsInView, sectionsControls
+  ]);
+  
+  // Hero section animation variants
+  const heroVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.2,
+      }
+    }
+  };
+  
+  const heroItemVariants = {
+    hidden: { 
+      y: 30, 
+      opacity: 0 
+    },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        duration: 0.7,
+        ease: "easeOut"
+      }
+    }
+  };
+  
+  // Features section animation variants
+  const featuresContainerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.15,
+      }
+    }
+  };
+  
+  const featureItemVariants = {
+    hidden: { 
+      y: 30, 
+      opacity: 0 
+    },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
   
   const features = [
     {
@@ -49,15 +130,32 @@ const Index = () => {
       
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="py-20 px-6 md:px-16 flex flex-col items-center justify-center text-center">
+        <motion.section 
+          className="py-20 px-6 md:px-16 flex flex-col items-center justify-center text-center"
+          ref={heroRef}
+          initial="hidden"
+          animate={heroControls}
+          variants={heroVariants}
+        >
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-crypto-purple to-crypto-blue bg-clip-text text-transparent animated-shadow floating">
+            <motion.h1 
+              className="text-4xl md:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-crypto-purple to-crypto-blue bg-clip-text text-transparent animated-shadow floating"
+              variants={heroItemVariants}
+            >
               امن‌ترین پلتفرم خرید و فروش تتر در ایران
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-10">
+            </motion.h1>
+            
+            <motion.p 
+              className="text-xl md:text-2xl text-muted-foreground mb-10"
+              variants={heroItemVariants}
+            >
               با بهترین قیمت و کمترین کارمزد، تتر خود را معامله کنید
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            </motion.p>
+            
+            <motion.div 
+              className="flex flex-wrap justify-center gap-4"
+              variants={heroItemVariants}
+            >
               <Button 
                 className="animated-gradient-button text-white px-8 py-6 rounded-full text-lg shadow-lg shadow-purple-500/20"
                 onClick={() => navigate('/auth')}
@@ -71,72 +169,135 @@ const Index = () => {
               >
                 مشاهده قیمت لحظه‌ای
               </Button>
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
         
         {/* 2D Sections Layout */}
-        <section className="py-12 px-6 md:px-16 bg-card/50 rounded-t-3xl">
+        <motion.section 
+          className="py-12 px-6 md:px-16 bg-card/50 rounded-t-3xl"
+          ref={sectionsRef}
+          initial="hidden"
+          animate={sectionsControls}
+          variants={featuresContainerVariants}
+        >
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-10">
-              <Grid2X2 className="w-6 h-6 text-crypto-purple" />
+            <motion.div 
+              className="flex items-center justify-center gap-2 mb-10"
+              variants={featureItemVariants}
+            >
+              <motion.div
+                animate={{ 
+                  rotate: [0, 180, 360],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Grid2X2 className="w-6 h-6 text-crypto-purple" />
+              </motion.div>
               <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-crypto-indigo to-crypto-purple bg-clip-text text-transparent">
                 بخش‌های ویژه
               </h2>
-            </div>
+            </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Column */}
-              <div className="space-y-8">
-                <div className="bg-card border border-border/50 p-8 rounded-2xl shadow-lg shadow-crypto-purple/5 card-3d">
+              <motion.div 
+                className="space-y-8"
+                variants={featureItemVariants}
+              >
+                <motion.div 
+                  className="bg-card border border-border/50 p-8 rounded-2xl shadow-lg shadow-crypto-purple/5 card-3d"
+                  whileHover={{ y: -8, boxShadow: "0 25px 50px -12px rgba(139, 92, 246, 0.25)" }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-crypto-purple to-crypto-blue bg-clip-text text-transparent">
                     معاملات آنلاین تتر
                   </h3>
                   <TetherExchangeCard />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
               
               {/* Right Column */}
-              <div className="bg-card border border-border/50 p-8 rounded-2xl shadow-lg shadow-crypto-purple/5 card-3d">
+              <motion.div 
+                className="bg-card border border-border/50 p-8 rounded-2xl shadow-lg shadow-crypto-purple/5 card-3d"
+                variants={featureItemVariants}
+                whileHover={{ y: -8, boxShadow: "0 25px 50px -12px rgba(139, 92, 246, 0.25)" }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-crypto-indigo to-crypto-teal bg-clip-text text-transparent">
                   همین حالا ثبت‌نام کنید
                 </h3>
                 <p className="text-lg text-muted-foreground mb-8">
                   با ثبت نام در تتر اکسچنج، به سادگی معاملات ارز دیجیتال خود را آغاز کنید
                 </p>
-                <Button 
-                  className="animated-gradient-button text-white px-8 py-6 w-full rounded-xl text-lg shadow-lg shadow-purple-500/20"
-                  onClick={() => navigate('/auth')}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  ثبت‌نام رایگان
-                </Button>
-              </div>
+                  <Button 
+                    className="animated-gradient-button text-white px-8 py-6 w-full rounded-xl text-lg shadow-lg shadow-purple-500/20"
+                    onClick={() => navigate('/auth')}
+                  >
+                    ثبت‌نام رایگان
+                  </Button>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </motion.section>
         
         {/* Features Section */}
-        <section className="py-20 px-6 md:px-16 bg-background">
+        <motion.section 
+          className="py-20 px-6 md:px-16 bg-background"
+          ref={featuresRef}
+          initial="hidden"
+          animate={featuresControls}
+          variants={featuresContainerVariants}
+        >
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-10">
-              <Columns2 className="w-6 h-6 text-crypto-purple" />
+            <motion.div 
+              className="flex items-center justify-center gap-2 mb-10"
+              variants={featureItemVariants}
+            >
+              <motion.div
+                animate={{ 
+                  rotateY: [0, 360]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Columns2 className="w-6 h-6 text-crypto-purple" />
+              </motion.div>
               <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-crypto-indigo to-crypto-purple bg-clip-text text-transparent">
                 ویژگی‌های برتر
               </h2>
-            </div>
+            </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <Feature3DCard
+                <motion.div
                   key={index}
-                  title={feature.title}
-                  description={feature.description}
-                  icon={feature.icon}
-                />
+                  variants={featureItemVariants}
+                  custom={index}
+                >
+                  <Feature3DCard
+                    title={feature.title}
+                    description={feature.description}
+                    icon={feature.icon}
+                  />
+                </motion.div>
               ))}
             </div>
           </div>
-        </section>
+        </motion.section>
       </main>
       
       <Footer />
